@@ -1,13 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <limits.h>
 #include <time.h>
 #include <assert.h>
 #include <math.h>
 
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 600
+#define HEIGHT 400
 #define RADIUS 4
 
 typedef struct {
@@ -114,10 +113,10 @@ void renderGraph(const int pointsCount, float p)
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
             int closest = 0;
-            long min_distance = LONG_MAX;
+            float min_distance = 3.402823466e+38f;
 
             for (int i = 0; i < pointsCount; ++i) {
-                long distance = minkowskiDistance(p, points[i], x, y);
+                float distance = minkowskiDistance(p, points[i], x, y);
                 if (min_distance > distance) {
                     min_distance = distance;
                     closest = i;
@@ -148,8 +147,13 @@ void saveToFile(const char* filename)
 
 int readParams(int argc, char** argv, float* p)
 {
-    if (argc != 2) {
-        printf("Usage: %s <# of points>\n", argv[0]);
+    if (argc < 2) {
+        printf("Usage: %s <# of points> [FACTOR] \n", argv[0]);
+        printf("Generates Voronoi diagram as PPM file\n");
+        printf("FACTOR represents parameter in Minkowski distance calculation.\n");
+
+        printf("Example: %s 16 \n", argv[0]);
+        printf("         %s 10 1.5\n", argv[0]);
         exit(1);
     }
 
@@ -159,12 +163,20 @@ int readParams(int argc, char** argv, float* p)
         exit(1);
     }
 
+    if (argc == 3) {
+        *p = atof(argv[2]);
+        if (*p <= 0) {
+            printf("Positive FACTOR expected %f\n", *p);
+            exit(1);
+        }
+    }
+
     return pointsCount;
 }
 
 int main(int argc, char** argv)
 {
-    float p = 1.5f;
+    float p = 2.0f;
     int pointsCount = readParams(argc, argv, &p);
 
     defineColors();

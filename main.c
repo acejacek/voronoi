@@ -101,30 +101,6 @@ void drawPoints(const int pointsCount)
     }
 }
 
-int euclideanDistanceSqr(Point p, int x, int y)
-{
-    int dx = x - p.x;
-    int dy = y - p.y;
-
-    return dx * dx + dy * dy;
-}
-
-int manhattanDistance(Point p, int x, int y)
-{
-    int dx = abs(x - p.x);
-    int dy = abs(y - p.y);
-
-    return dx + dy;
-}
-
-long pw(int a, int p)
-{
-    for (int i = 2; i <= p; i++)
-        a *= a;
-
-    return a;
-}
-
 float minkowskiDistance(float p, Point n, int x, int y)
 {
     int dx = abs(x - n.x);
@@ -133,7 +109,7 @@ float minkowskiDistance(float p, Point n, int x, int y)
     return powf(dx, p) + powf(dy, p);
 }
 
-void renderGraph(const int pointsCount, int p)
+void renderGraph(const int pointsCount, float p)
 {
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
@@ -141,8 +117,6 @@ void renderGraph(const int pointsCount, int p)
             long min_distance = LONG_MAX;
 
             for (int i = 0; i < pointsCount; ++i) {
-                //int distance = euclideanDistanceSqr(points[i], x, y);
-                //int distance= manhattanDistance(points[i], x, y);
                 long distance = minkowskiDistance(p, points[i], x, y);
                 if (min_distance > distance) {
                     min_distance = distance;
@@ -172,7 +146,7 @@ void saveToFile(const char* filename)
     fclose(f);
 }
 
-int readParams(int argc, char** argv, int* p)
+int readParams(int argc, char** argv, float* p)
 {
     if (argc != 2) {
         printf("Usage: %s <# of points>\n", argv[0]);
@@ -190,7 +164,7 @@ int readParams(int argc, char** argv, int* p)
 
 int main(int argc, char** argv)
 {
-    int p = 3;
+    float p = 1.5f;
     int pointsCount = readParams(argc, argv, &p);
 
     defineColors();

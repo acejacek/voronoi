@@ -5,9 +5,9 @@
 #include <time.h>
 #include <assert.h>
 
-#define WIDTH 500
-#define HEIGHT 400
-#define RADIUS 5
+#define WIDTH 800
+#define HEIGHT 600
+#define RADIUS 4
 
 typedef struct {
     int x;
@@ -74,8 +74,8 @@ void setRandomPoints(int pointsCount)
     assert(points);
 
     for (int i = 0; i < pointsCount; ++i) {
-        points[i].x = RADIUS + rand() % (WIDTH - RADIUS);
-        points[i].y = RADIUS + rand() % (HEIGHT - RADIUS);
+        points[i].x = rand() % WIDTH;
+        points[i].y = rand() % HEIGHT;
     }
 }
 
@@ -147,7 +147,6 @@ int main(int argc, char** argv)
     }
 
     int pointsCount = atoi(argv[1]);
-
     if (pointsCount < 1) exit(0);
 
 
@@ -155,7 +154,7 @@ int main(int argc, char** argv)
     setRandomPoints(pointsCount);
     renderGraph(pointsCount);
     drawPoints(pointsCount);
-    saveToFile("graph.ppm");
+    saveToFile("voronoi.ppm");
 
     free(points);
     return 0;

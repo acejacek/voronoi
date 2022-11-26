@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <time.h>
 #include <assert.h>
+#include <math.h>
 
 #define WIDTH 800
 #define HEIGHT 600
@@ -100,19 +101,51 @@ void drawPoints(const int pointsCount)
     }
 }
 
-void renderGraph(const int pointsCount)
+int euclideanDistanceSqr(Point p, int x, int y)
+{
+    int dx = x - p.x;
+    int dy = y - p.y;
+
+    return dx * dx + dy * dy;
+}
+
+int manhattanDistance(Point p, int x, int y)
+{
+    int dx = abs(x - p.x);
+    int dy = abs(y - p.y);
+
+    return dx + dy;
+}
+
+long pw(int a, int p)
+{
+    for (int i = 2; i <= p; i++)
+        a *= a;
+
+    return a;
+}
+
+float minkowskiDistance(float p, Point n, int x, int y)
+{
+    int dx = abs(x - n.x);
+    int dy = abs(y - n.y);
+
+    return powf(dx, p) + powf(dy, p);
+}
+
+void renderGraph(const int pointsCount, int p)
 {
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
             int closest = 0;
-            int min_distans = INT_MAX;
+            long min_distance = LONG_MAX;
 
             for (int i = 0; i < pointsCount; ++i) {
-                int dx = x - points[i].x;
-                int dy = y - points[i].y;
-                int distans = dx * dx + dy * dy;
-                if (min_distans > distans) {
-                    min_distans = distans;
+                //int distance = euclideanDistanceSqr(points[i], x, y);
+                //int distance= manhattanDistance(points[i], x, y);
+                long distance = minkowskiDistance(p, points[i], x, y);
+                if (min_distance > distance) {
+                    min_distance = distance;
                     closest = i;
                 }
             }
@@ -139,7 +172,7 @@ void saveToFile(const char* filename)
     fclose(f);
 }
 
-int main(int argc, char** argv)
+int readParams(int argc, char** argv, int* p)
 {
     if (argc != 2) {
         printf("Usage: %s <# of points>\n", argv[0]);
@@ -147,12 +180,22 @@ int main(int argc, char** argv)
     }
 
     int pointsCount = atoi(argv[1]);
-    if (pointsCount < 1) exit(0);
+    if (pointsCount < 1) {
+        printf("Wrong number of points %s\n", argv[1]);
+        exit(1);
+    }
 
+    return pointsCount;
+}
+
+int main(int argc, char** argv)
+{
+    int p = 3;
+    int pointsCount = readParams(argc, argv, &p);
 
     defineColors();
     setRandomPoints(pointsCount);
-    renderGraph(pointsCount);
+    renderGraph(pointsCount, p);
     drawPoints(pointsCount);
     saveToFile("voronoi.ppm");
 

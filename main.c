@@ -5,8 +5,8 @@
 #include <assert.h>
 #include <math.h>
 
-#define WIDTH 600
-#define HEIGHT 400
+#define WIDTH 800
+#define HEIGHT 600
 #define RADIUS 4
 
 typedef struct {
@@ -122,7 +122,7 @@ void renderGraph(const int pointsCount, float p)
                     closest = i;
                 }
             }
-            screen[y][x] = colors[1 + (closest % 15)];
+            screen[y][x] = colors[1 + (closest % 15)]; // skip black
         }
     }
 }
@@ -150,7 +150,7 @@ int readParams(int argc, char** argv, float* p)
     if (argc < 2) {
         printf("Usage: %s <# of points> [FACTOR] \n", argv[0]);
         printf("Generates Voronoi diagram as PPM file\n");
-        printf("FACTOR represents parameter in Minkowski distance calculation.\n");
+        printf("Optional FACTOR represents parameter in Minkowski distance calculation.\n");
 
         printf("Example: %s 16 \n", argv[0]);
         printf("         %s 10 1.5\n", argv[0]);
@@ -159,14 +159,14 @@ int readParams(int argc, char** argv, float* p)
 
     int pointsCount = atoi(argv[1]);
     if (pointsCount < 1) {
-        printf("Wrong number of points %s\n", argv[1]);
+        printf("Wrong number of points: %s\n", argv[1]);
         exit(1);
     }
 
     if (argc == 3) {
         *p = atof(argv[2]);
         if (*p <= 0) {
-            printf("Positive FACTOR expected %f\n", *p);
+            printf("Positive FACTOR expected: %f\n", *p);
             exit(1);
         }
     }

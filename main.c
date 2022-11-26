@@ -49,24 +49,24 @@ static Pixel colors[COLORS];
 void defineColors()
 {
     colors[0] = (Pixel){0,0,0};
-  	colors[1] = (Pixel){255,255,255};
-  	colors[2] = (Pixel){255,0,0};
-  	colors[3] = (Pixel){0,255,0};
-  	colors[4] = (Pixel){0,0,255};
-  	colors[5] = (Pixel){255,255,0};
-  	colors[6] = (Pixel){0,255,255};
-  	colors[7] = (Pixel){255,0,255};
-  	colors[8] = (Pixel){192,192,192};
-  	colors[9] = (Pixel){128,128,128};
-  	colors[10] = (Pixel){128,0,0};
-  	colors[11] = (Pixel){128,128,0};
-  	colors[12] = (Pixel){0,128,0};
-  	colors[13] = (Pixel){128,0,128};
-  	colors[14] = (Pixel){0,128,128};
-  	colors[15] = (Pixel){0,0,128};
+    colors[1] = (Pixel){255,255,255};
+    colors[2] = (Pixel){255,0,0};
+    colors[3] = (Pixel){0,255,0};
+    colors[4] = (Pixel){0,0,255};
+    colors[5] = (Pixel){255,255,0};
+    colors[6] = (Pixel){0,255,255};
+    colors[7] = (Pixel){255,0,255};
+    colors[8] = (Pixel){192,192,192};
+    colors[9] = (Pixel){128,128,128};
+    colors[10] = (Pixel){128,0,0};
+    colors[11] = (Pixel){128,128,0};
+    colors[12] = (Pixel){0,128,0};
+    colors[13] = (Pixel){128,0,128};
+    colors[14] = (Pixel){0,128,128};
+    colors[15] = (Pixel){0,0,128};
 }
 
-void setRandomPoints(int pointsCount)
+void setRandomPoints(const int pointsCount)
 {
     srand(time(NULL));
 
@@ -79,7 +79,7 @@ void setRandomPoints(int pointsCount)
     }
 }
 
-void drawPoints(int pointsCount)
+void drawPoints(const int pointsCount)
 {
     for (int i = 0; i < pointsCount; ++i) {
         int xmin = points[i].x - RADIUS;
@@ -100,7 +100,7 @@ void drawPoints(int pointsCount)
     }
 }
 
-void renderGraph(int pointsCount)
+void renderGraph(const int pointsCount)
 {
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
@@ -116,7 +116,7 @@ void renderGraph(int pointsCount)
                     closest = i;
                 }
             }
-            screen[y][x] = colors[(closest+1) % 16 ];
+            screen[y][x] = colors[1 + (closest % 15)];
         }
     }
 }

@@ -245,9 +245,9 @@ void readParams(int argc, char** argv, Diagram* d)
     }
 }
 
-Diagram initDiagram(int argc, char** argv)
+Diagram* initDiagram(int argc, char** argv)
 {
-    Diagram voronoi = {
+    static Diagram voronoi = {
         .pointsCount = NUMBER_OF_POINTS,
         .points = NULL,
         .radius = RADIUS,
@@ -268,17 +268,17 @@ Diagram initDiagram(int argc, char** argv)
         assert(voronoi.screen[i]);
     }
 
-    return voronoi;
+    return &voronoi;
 }
 
 int main(int argc, char** argv)
 {
     defineColors();
-    Diagram v = initDiagram(argc, argv);
-    setRandomPoints(&v);
-    renderGraph(&v);
-    drawPoints(&v);
-    saveToFile(&v);
+    Diagram* v = initDiagram(argc, argv);
+    setRandomPoints(v);
+    renderGraph(v);
+    drawPoints(v);
+    saveToFile(v);
 
     return 0;
 }

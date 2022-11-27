@@ -107,16 +107,16 @@ void setRandomPoints(Diagram* v)
 void drawPoints(Diagram* v)
 {
     for (int i = 0; i < v->pointsCount; ++i) {
-        int xmin = v->points[i].x - RADIUS;
-        int xmax = v->points[i].x + RADIUS;
-        int ymin = v->points[i].y - RADIUS;
-        int ymax = v->points[i].y + RADIUS;
+        int xmin = v->points[i].x - v->radius;
+        int xmax = v->points[i].x + v->radius;
+        int ymin = v->points[i].y - v->radius;
+        int ymax = v->points[i].y + v->radius;
 
         for (int y = ymin; y <= ymax; ++y) {
             for (int x = xmin; x <= xmax; ++x) {
                 int dx = v->points[i].x - x;
                 int dy = v->points[i].y - y;
-                if (RADIUS * RADIUS >= dx * dx + dy * dy) {
+                if (v->radius * v->radius >= dx * dx + dy * dy) {
                     if (x >= 0 && x < v->width && y >= 0 && y < v->height)
                         v->screen[y][x] = colors[Black];
                 }
@@ -177,11 +177,12 @@ void usage(char* prog)
         printf("Generates Voronoi diagram as PPM file.\n");
         printf("\n");
         printf("-s #        - number of points in diagram, default %d\n", NUMBER_OF_POINTS);
-        printf("-p FACTOR   - parameter in Minkowski distance calculation, default %01f\n", P_FACTOR);
+        printf("-p #        - parameter in Minkowski distance calculation, default %.1f\n", P_FACTOR);
         printf("-c          - automatically generate color palette\n");
         printf("-f FILENAME - optional output filename, default %s\n", FILENAME);
         printf("-w #        - diagram width, default %d\n", WIDTH);
         printf("-h #        - diagram height, default %d\n", HEIGHT);
+        printf("-r #        - point radius, default %d\n", RADIUS);
         printf("\n");
         printf("Example: %s -s 9 \n", prog);
         printf("         %s -s 44 -p 1.5 -c\n", prog);
@@ -191,7 +192,7 @@ void usage(char* prog)
 void readParams(int argc, char** argv, Diagram* d)
 {
     char opt;    
-    while ((opt = getopt(argc, argv, "-s:-p:-f:-c-w:-h:")) != -1 ) {
+    while ((opt = getopt(argc, argv, "-s:-p:-f:-c-w:-h:-r:")) != -1 ) {
         switch (opt) {
             case 's':
                 d->pointsCount = atoi(optarg);
@@ -227,6 +228,13 @@ void readParams(int argc, char** argv, Diagram* d)
                 d->height = atoi(optarg);
                 if (d->height > 4000 || d->height <= 0 ) {
                     printf("Expected height in range 0 - 4000\n");
+                    exit(1);
+                }
+                break;
+            case 'r':
+                d->radius = atoi(optarg);
+                if (d->radius > 100 || d->height <= 0 ) {
+                    printf("Expected radius in range 0 - 100\n");
                     exit(1);
                 }
                 break;

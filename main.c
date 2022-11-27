@@ -11,6 +11,8 @@
 #define WIDTH 600
 #define HEIGHT 400
 #define NUMBER_OF_POINTS 15
+#define FILENAME "voronoi.ppm"
+#define P_FACTOR 2.0f
 
 typedef struct {
     uint8_t r;
@@ -172,22 +174,24 @@ void saveToFile(Diagram* v)
 void usage(char* prog)
 {
         printf("Usage: %s [OPTION]...\n", prog);
-        printf("Generates Voronoi diagram as PPM file\n");
+        printf("Generates Voronoi diagram as PPM file.\n");
         printf("\n");
-        printf("-s #        - number of points in diagram, default 16\n");
-        printf("-p FACTOR   - parameter in Minkowski distance calculation, default 2\n");
+        printf("-s #        - number of points in diagram, default %d\n", NUMBER_OF_POINTS);
+        printf("-p FACTOR   - parameter in Minkowski distance calculation, default %01f\n", P_FACTOR);
         printf("-c          - automatically generate color palette\n");
-        printf("-f FILENAME - optional output filename, default voronoi.ppm\n");
+        printf("-f FILENAME - optional output filename, default %s\n", FILENAME);
+        printf("-w #        - diagram width, default %d\n", WIDTH);
+        printf("-h #        - diagram height, default %d\n", HEIGHT);
         printf("\n");
         printf("Example: %s -s 9 \n", prog);
-        printf("         %s -s 44 -p 1.5 -c \n", prog);
+        printf("         %s -s 44 -p 1.5 -c\n", prog);
         exit(1);
 }
 
 void readParams(int argc, char** argv, Diagram* d)
 {
     char opt;    
-    while ((opt = getopt(argc, argv, "-s:-p:-f:-c")) != -1 ) {
+    while ((opt = getopt(argc, argv, "-s:-p:-f:-c-w:-h:")) != -1 ) {
         switch (opt) {
             case 's':
                 d->pointsCount = atoi(optarg);
@@ -212,6 +216,20 @@ void readParams(int argc, char** argv, Diagram* d)
             case 'f':
                 strcpy(d->resultFile, optarg);
                 break;
+            case 'w':
+                d->width = atoi(optarg);
+                if (d->width > 5000 || d->width <= 0 ) {
+                    printf("Expected width in range 0 - 5000\n");
+                    exit(1);
+                }
+                break;
+            case 'h':
+                d->height = atoi(optarg);
+                if (d->height > 4000 || d->height <= 0 ) {
+                    printf("Expected height in range 0 - 4000\n");
+                    exit(1);
+                }
+                break;
 
             default:
                 usage(argv[0]);
@@ -228,8 +246,8 @@ Diagram initDiagram(int argc, char** argv)
         .width = WIDTH,
         .height = HEIGHT,
         .autoGenerateColors  = 0,
-        .p = 2.0f,
-        .resultFile = "voronoi.ppm",
+        .p = P_FACTOR,
+        .resultFile = FILENAME,
         .screen = NULL,
     };
     

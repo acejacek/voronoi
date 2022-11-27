@@ -96,11 +96,11 @@ void setRandomPoints(Diagram* v)
         v->points[i].x = rand() % v->width;
         v->points[i].y = rand() % v->height;
         if (v->autoGenerateColors) {
-            v->points[i].color.r = map (v->points[i].x, 0, v->width, 0, 255);
-            v->points[i].color.g = map (v->points[i].y, 0, v->height, 0, 255);
-            v->points[i].color.b = map (v->points[i].x + v->points[i].y, 0, v->width + v->height, 0, 255);
+            v->points[i].color.r = map(v->points[i].x, 0, v->width, 0, 255);
+            v->points[i].color.g = map(v->points[i].y, 0, v->height, 0, 255);
+            v->points[i].color.b = map(v->points[i].x + v->points[i].y, 0, v->width + v->height, 0, 255);
         } else 
-            v->points[i].color = colors[1 + (i % 15)];
+            v->points[i].color = colors[1 + (i % 15)];  // skip black
     }
 }
 
@@ -130,7 +130,7 @@ float minkowskiDistance(float p, Point n, int x, int y)
     int dx = abs(x - n.x);
     int dy = abs(y - n.y);
 
-    return powf(dx, p) + powf(dy, p);
+    return powf((float)dx, p) + powf((float)dy, p);
 }
 
 void renderGraph(Diagram* v)
@@ -147,8 +147,7 @@ void renderGraph(Diagram* v)
                     closest = i;
                 }
             }
-            // screen[y][x] = colors[1 + (closest % 15)]; // skip black
-            v->screen[y][x] = v->points[closest].color; // skip black
+            v->screen[y][x] = v->points[closest].color;
         }
     }
 }
@@ -156,6 +155,9 @@ void renderGraph(Diagram* v)
 void saveToFile(Diagram* v) 
 {
     FILE* f = fopen(v->resultFile, "wb");
+    size_t bytesToWrite = 1;
+    size_t res;
+
     if (!f) {
         printf("ERROR: Can't create file %s\n", v->resultFile);
         exit(1);
@@ -163,12 +165,18 @@ void saveToFile(Diagram* v)
     fprintf(f, "P6\n%d %d\n255\n", v->width, v->height);
     for (int y = 0; y < v->height; ++y){
         for (int x = 0; x < v->width; ++x) {
-            fwrite(&v->screen[y][x].r, sizeof(char), 1, f);
-            fwrite(&v->screen[y][x].g, sizeof(char), 1, f);
-            fwrite(&v->screen[y][x].b, sizeof(char), 1, f);
+            res = fwrite(&v->screen[y][x].r, sizeof(uint8_t), bytesToWrite, f);
+            assert(res == bytesToWrite);
+
+            res = fwrite(&v->screen[y][x].g, sizeof(uint8_t), bytesToWrite, f);
+            assert(res == bytesToWrite);
+
+            res = fwrite(&v->screen[y][x].b, sizeof(uint8_t), bytesToWrite, f);
+            assert(res == bytesToWrite);
         }
     }
-    fclose(f);
+    int closed = fclose(f);
+    assert(closed == 0);
 }
 
 void usage(char* prog)
@@ -238,7 +246,6 @@ void readParams(int argc, char** argv, Diagram* d)
                     exit(1);
                 }
                 break;
-
             default:
                 usage(argv[0]);
             }

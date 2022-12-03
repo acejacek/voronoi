@@ -172,17 +172,15 @@ Errno saveToFile(Diagram* v)
     fprintf(f, "P6\n%d %d\n255\n", v->width, v->height);
     if (ferror(f)) return_defer(errno);
 
-    for (int y = 0; y < v->height; ++y){
-        for (int x = 0; x < v->width; ++x) {
-            fwrite(&v->screen[y * v->width + x].r, sizeof(uint8_t), 1, f);
-            if (ferror(f)) return_defer(errno);
+    for (int i = 0; i < v->height * v->width; ++i) {
+        fwrite(&v->screen[i].r, sizeof(uint8_t), 1, f);
+        if (ferror(f)) return_defer(errno);
 
-            fwrite(&v->screen[y * v->width + x].g, sizeof(uint8_t), 1, f);
-            if (ferror(f)) return_defer(errno);
+        fwrite(&v->screen[i].g, sizeof(uint8_t), 1, f);
+        if (ferror(f)) return_defer(errno);
 
-            fwrite(&v->screen[y * v->width + x].b, sizeof(uint8_t), 1, f);
-            if (ferror(f)) return_defer(errno);
-        }
+        fwrite(&v->screen[i].b, sizeof(uint8_t), 1, f);
+        if (ferror(f)) return_defer(errno);
     }
 
  close_file:
@@ -279,7 +277,7 @@ Diagram* initDiagram(int argc, char** argv)
 
     readParams(argc, argv, &voronoi);
 
-    voronoi.screen =  malloc(sizeof(Pixel) * voronoi.height * voronoi.width);
+    voronoi.screen =  (Pixel*) malloc(sizeof(Pixel) * voronoi.height * voronoi.width);
     assert(voronoi.screen != NULL);
 
     return &voronoi;

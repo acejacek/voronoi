@@ -44,14 +44,14 @@ enum color_name {
   	White,
   	Red,
   	Lime,
-  	Blue ,
+  	Blue,
   	Yellow,
-  	Cyan, 
+  	Cyan,
   	Magenta,
   	Silver,
   	Gray,
   	Maroon,
-  	Olive,	
+  	Olive,
   	Green,
   	Purple,
   	Teal,
@@ -99,7 +99,7 @@ void setRandomPoints(Diagram* v)
             v->points[i].color.r = map(v->points[i].x, 0, v->width, 0, 255);
             v->points[i].color.g = map(v->points[i].y, 0, v->height, 0, 255);
             v->points[i].color.b = map(v->points[i].x + v->points[i].y, 0, v->width + v->height, 0, 255);
-        } else 
+        } else
             v->points[i].color = colors[1 + (i % 15)];  // skip black
     }
 }
@@ -113,12 +113,15 @@ void drawPoints(Diagram* v)
         int ymax = v->points[i].y + v->radius;
 
         for (int y = ymin; y <= ymax; ++y) {
+            if (y < 0 || y >= v->height) continue;
+
             for (int x = xmin; x <= xmax; ++x) {
+                if (x < 0 ||  x >= v->width) continue;
+
                 int dx = v->points[i].x - x;
                 int dy = v->points[i].y - y;
                 if (v->radius * v->radius >= dx * dx + dy * dy) {
-                    if (x >= 0 && x < v->width && y >= 0 && y < v->height)
-                        v->screen[y][x] = colors[Black];
+                    v->screen[y][x] = colors[Black];
                 }
             }
         }
@@ -152,7 +155,7 @@ void renderGraph(Diagram* v)
     }
 }
 
-void saveToFile(Diagram* v) 
+void saveToFile(Diagram* v)
 {
     FILE* f = fopen(v->resultFile, "wb");
     size_t bytesToWrite = 1;
@@ -199,7 +202,7 @@ void usage(char* prog)
 
 void readParams(int argc, char** argv, Diagram* d)
 {
-    char opt;    
+    char opt;
     while ((opt = getopt(argc, argv, "-s:-p:-f:-c-w:-h:-r:")) != -1 ) {
         switch (opt) {
             case 's':
@@ -265,7 +268,7 @@ Diagram* initDiagram(int argc, char** argv)
         .resultFile = FILENAME,
         .screen = NULL,
     };
-    
+
     readParams(argc, argv, &voronoi);
 
     voronoi.screen = malloc(voronoi.height * sizeof(Pixel*));

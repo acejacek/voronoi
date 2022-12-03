@@ -2,10 +2,13 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
+#include <errno.h>
 #include <assert.h>
 #include <math.h>
 #include <getopt.h>
 #include <string.h>
+
+#define return_defer(value) do { result = (value); goto close_file; } while(0)
 
 #define RADIUS 4
 #define WIDTH 600
@@ -13,6 +16,8 @@
 #define NUMBER_OF_POINTS 15
 #define FILENAME "voronoi.ppm"
 #define P_FACTOR 2.0f
+
+typedef int Errno;
 
 typedef struct {
     uint8_t r;
@@ -24,7 +29,7 @@ typedef struct {
     int x;
     int y;
     Pixel color;
-} Point;
+} Point; 
 
 typedef struct {
     int pointsCount;
@@ -155,31 +160,34 @@ void renderGraph(Diagram* v)
     }
 }
 
-void saveToFile(Diagram* v)
+Errno saveToFile(Diagram* v)
 {
-    FILE* f = fopen(v->resultFile, "wb");
-    size_t bytesToWrite = 1;
-    size_t res;
+    Errno result = 0;
+    FILE* f = NULL;
 
-    if (!f) {
-        printf("ERROR: Can't create file %s\n", v->resultFile);
-        exit(1);
-    }
+    f = fopen(v->resultFile, "wb");
+
+    if (f == NULL) return_defer(errno);
+
     fprintf(f, "P6\n%d %d\n255\n", v->width, v->height);
+    if (ferror(f)) return_defer(errno);
+
     for (int y = 0; y < v->height; ++y){
         for (int x = 0; x < v->width; ++x) {
-            res = fwrite(&v->screen[y][x].r, sizeof(uint8_t), bytesToWrite, f);
-            assert(res == bytesToWrite);
+            fwrite(&v->screen[y][x].r, sizeof(uint8_t), 1, f);
+            if (ferror(f)) return_defer(errno);
 
-            res = fwrite(&v->screen[y][x].g, sizeof(uint8_t), bytesToWrite, f);
-            assert(res == bytesToWrite);
+            fwrite(&v->screen[y][x].g, sizeof(uint8_t), 1, f);
+            if (ferror(f)) return_defer(errno);
 
-            res = fwrite(&v->screen[y][x].b, sizeof(uint8_t), bytesToWrite, f);
-            assert(res == bytesToWrite);
+            fwrite(&v->screen[y][x].b, sizeof(uint8_t), 1, f);
+            if (ferror(f)) return_defer(errno);
         }
     }
-    int closed = fclose(f);
-    assert(closed == 0);
+
+ close_file:
+    if (f) fclose(f);
+    return result;
 }
 
 void usage(char* prog)
@@ -283,12 +291,18 @@ Diagram* initDiagram(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
+    Errno result = 0;
+
     defineColors();
     Diagram* v = initDiagram(argc, argv);
     setRandomPoints(v);
     renderGraph(v);
     drawPoints(v);
-    saveToFile(v);
+    Errno err = saveToFile(v);
+    if (err != 0) {
+        fprintf(stderr, "Error: could not write to file %s: %s\n", v->resultFile, strerror(err));
+        result = 1;
+    }
 
-    return 0;
+    return result;;
 }

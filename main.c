@@ -29,7 +29,7 @@ typedef struct {
     int x;
     int y;
     Pixel color;
-} Point; 
+} Point;
 
 typedef struct {
     int pointsCount;
@@ -40,7 +40,7 @@ typedef struct {
     int autoGenerateColors;
     float p;
     char resultFile[100];
-    Pixel** screen;
+    Pixel* screen;
 } Diagram;
 
 #define COLORS 16
@@ -126,7 +126,7 @@ void drawPoints(Diagram* v)
                 int dx = v->points[i].x - x;
                 int dy = v->points[i].y - y;
                 if (v->radius * v->radius >= dx * dx + dy * dy) {
-                    v->screen[y][x] = colors[Black];
+                    v->screen[y * v->width + x] = colors[Black];
                 }
             }
         }
@@ -155,7 +155,7 @@ void renderGraph(Diagram* v)
                     closest = i;
                 }
             }
-            v->screen[y][x] = v->points[closest].color;
+            v->screen[y * v->width + x] = v->points[closest].color;
         }
     }
 }
@@ -174,13 +174,13 @@ Errno saveToFile(Diagram* v)
 
     for (int y = 0; y < v->height; ++y){
         for (int x = 0; x < v->width; ++x) {
-            fwrite(&v->screen[y][x].r, sizeof(uint8_t), 1, f);
+            fwrite(&v->screen[y * v->width + x].r, sizeof(uint8_t), 1, f);
             if (ferror(f)) return_defer(errno);
 
-            fwrite(&v->screen[y][x].g, sizeof(uint8_t), 1, f);
+            fwrite(&v->screen[y * v->width + x].g, sizeof(uint8_t), 1, f);
             if (ferror(f)) return_defer(errno);
 
-            fwrite(&v->screen[y][x].b, sizeof(uint8_t), 1, f);
+            fwrite(&v->screen[y * v->width + x].b, sizeof(uint8_t), 1, f);
             if (ferror(f)) return_defer(errno);
         }
     }
@@ -279,12 +279,8 @@ Diagram* initDiagram(int argc, char** argv)
 
     readParams(argc, argv, &voronoi);
 
-    voronoi.screen = malloc(voronoi.height * sizeof(Pixel*));
-    assert(voronoi.screen);
-    for (int i = 0; i < voronoi.height; ++i) {
-        voronoi.screen[i] = malloc(voronoi.width * sizeof(Pixel));
-        assert(voronoi.screen[i]);
-    }
+    voronoi.screen =  malloc(sizeof(Pixel) * voronoi.height * voronoi.width);
+    assert(voronoi.screen != NULL);
 
     return &voronoi;
 }

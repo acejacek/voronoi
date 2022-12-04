@@ -11,8 +11,11 @@
 #define return_defer(value) do { result = (value); goto close_file; } while(0)
 
 #define RADIUS 4
+#define RADIUS_LIMIT 100
 #define WIDTH 600
 #define HEIGHT 400
+#define WIDTH_LIMIT 8000
+#define HEIGHT_LIMIT 3000
 #define NUMBER_OF_POINTS 15
 #define FILENAME "voronoi.ppm"
 #define P_FACTOR 2.0f
@@ -188,20 +191,20 @@ Errno saveToFile(Diagram* v)
     return result;
 }
 
-void usage(char* prog)
+void usage(FILE* f, char* prog)
 {
-        printf("Usage: %s [OPTION]...\n", prog);
-        printf("Generates Voronoi diagram as PPM file.\n");
-        printf("\n");
-        printf("-s #        - number of points in diagram, default %d\n", NUMBER_OF_POINTS);
-        printf("-p #        - parameter in Minkowski distance calculation, default %.1f\n", P_FACTOR);
-        printf("-c          - automatically generate color palette\n");
-        printf("-f FILENAME - optional output filename, default %s\n", FILENAME);
-        printf("-w #        - diagram width, default %d\n", WIDTH);
-        printf("-h #        - diagram height, default %d\n", HEIGHT);
-        printf("-r #        - point radius, default %d\n", RADIUS);
-        printf("\n");
-        printf("Example: %s -s 9 \n", prog);
+        fprintf(f, "Usage: %s [OPTION]...\n", prog);
+        fprintf(f, "Generates Voronoi diagram as PPM file.\n");
+        fprintf(f, "\n");
+        fprintf(f, "-s #        - number of points in diagram, default %d\n", NUMBER_OF_POINTS);
+        fprintf(f, "-p #        - parameter in Minkowski distance calculation, default %.1f\n", P_FACTOR);
+        fprintf(f, "-c          - automatically generate color palette\n");
+        fprintf(f, "-f FILENAME - optional output filename, default %s\n", FILENAME);
+        fprintf(f, "-w #        - diagram width, default %d\n", WIDTH);
+        fprintf(f, "-h #        - diagram height, default %d\n", HEIGHT);
+        fprintf(f, "-r #        - point radius, default %d\n", RADIUS);
+        fprintf(f, "\n");
+        fprintf(f, "Example: %s -s 9 \n", prog);
         printf("         %s -s 44 -p 1.5 -c\n", prog);
         exit(1);
 }
@@ -214,7 +217,7 @@ void readParams(int argc, char** argv, Diagram* d)
             case 's':
                 d->pointsCount = atoi(optarg);
                 if (d->pointsCount < 1) {
-                    printf("Wrong number of points: %s\n", optarg);
+                    fprintf(stderr, "Wrong number of points: %s\n", optarg);
                     exit(1);
                 }
                 break;
@@ -222,7 +225,7 @@ void readParams(int argc, char** argv, Diagram* d)
             case 'p':
                 d->p = atof(optarg);
                 if (d->p <= 0) {
-                    printf("Positive FACTOR expected: %s\n", optarg);
+                    fprintf(stderr, "Positive p-factor expected: %s\n", optarg);
                     exit(1);
                 }
                 break;
@@ -234,29 +237,33 @@ void readParams(int argc, char** argv, Diagram* d)
             case 'f':
                 strcpy(d->resultFile, optarg);
                 break;
+
             case 'w':
                 d->width = atoi(optarg);
-                if (d->width > 5000 || d->width <= 0 ) {
-                    printf("Expected width in range 0 - 5000\n");
+                if (d->width > WIDTH_LIMIT || d->width < 1 ) {
+                    fprintf(stderr, "Expected width in range 1 - %d\n", WIDTH_LIMIT);
                     exit(1);
                 }
                 break;
+
             case 'h':
                 d->height = atoi(optarg);
-                if (d->height > 4000 || d->height <= 0 ) {
-                    printf("Expected height in range 0 - 4000\n");
+                if (d->height > HEIGHT_LIMIT || d->height < 1 ) {
+                    fprintf(stderr, "Expected height in range 1 - %d\n", HEIGHT_LIMIT);
                     exit(1);
                 }
                 break;
+
             case 'r':
                 d->radius = atoi(optarg);
-                if (d->radius > 100 || d->height <= 0 ) {
-                    printf("Expected radius in range 0 - 100\n");
+                if (d->radius > RADIUS_LIMIT || d->radius < 0 ) {
+                    fprintf(stderr, "Expected radius in range 0 - %d\n", RADIUS_LIMIT);
                     exit(1);
                 }
                 break;
+
             default:
-                usage(argv[0]);
+                usage(stderr, argv[0]);
             }
     }
 }

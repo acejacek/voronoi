@@ -41,6 +41,7 @@ typedef struct {
     float p;
     char resultFile[100];
     Pixel* screen;
+    Pixel* colors;
 } Diagram;
 
 #define COLORS 16
@@ -63,10 +64,11 @@ enum color_name {
   	Navy,
 };
 
-static Pixel colors[COLORS];
-
-void defineColors()
+Pixel* defineColors()
 {
+    Pixel* colors = malloc(COLORS * sizeof(Pixel));
+    assert(colors != NULL);
+
     colors[0] = (Pixel){0,0,0};
     colors[1] = (Pixel){255,255,255};
     colors[2] = (Pixel){255,0,0};
@@ -83,6 +85,8 @@ void defineColors()
     colors[13] = (Pixel){128,0,128};
     colors[14] = (Pixel){0,128,128};
     colors[15] = (Pixel){0,0,128};
+
+    return colors;
 }
 
 static inline long map(long x, long in_min, long in_max, long out_min, long out_max)
@@ -105,7 +109,7 @@ void setRandomPoints(Diagram* v)
             v->points[i].color.g = map(v->points[i].y, 0, v->height, 0, 255);
             v->points[i].color.b = map(v->points[i].x + v->points[i].y, 0, v->width + v->height, 0, 255);
         } else
-            v->points[i].color = colors[1 + (i % 15)];  // skip black
+            v->points[i].color = v->colors[1 + (i % 15)];  // skip black
     }
 }
 
@@ -126,7 +130,7 @@ void drawPoints(Diagram* v)
                 int dx = v->points[i].x - x;
                 int dy = v->points[i].y - y;
                 if (v->radius * v->radius >= dx * dx + dy * dy) {
-                    v->screen[y * v->width + x] = colors[Black];
+                    v->screen[y * v->width + x] = v->colors[Black];
                 }
             }
         }
@@ -269,12 +273,15 @@ Diagram* initDiagram(int argc, char** argv)
         .p = P_FACTOR,
         .resultFile = FILENAME,
         .screen = NULL,
+        .colors = NULL,
     };
 
     readParams(argc, argv, &voronoi);
 
     voronoi.screen =  (Pixel*) malloc(sizeof(Pixel) * voronoi.height * voronoi.width);
     assert(voronoi.screen != NULL);
+
+    voronoi.colors = defineColors();
 
     return &voronoi;
 }
@@ -283,7 +290,6 @@ int main(int argc, char** argv)
 {
     Errno result = 0;
 
-    defineColors();
     Diagram* v = initDiagram(argc, argv);
     setRandomPoints(v);
     renderGraph(v);

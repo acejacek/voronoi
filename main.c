@@ -176,11 +176,8 @@ Errno saveToFile(Diagram* v)
     fprintf(f, "P6\n%d %d\n255\n", v->width, v->height);
     if (ferror(f)) return_defer(errno);
 
-    for (int i = 0; i < v->height * v->width; ++i) {
-
-        fwrite(&v->screen[i], sizeof(uint8_t), 3, f);   // write three RGB bytes in one shot
-        if (ferror(f)) return_defer(errno);
-    }
+    fwrite(v->screen, sizeof(Pixel), v->width * v->height, f);   // save full screen memory
+    if (ferror(f)) return_defer(errno);
 
  close_file:
     if (f) fclose(f);

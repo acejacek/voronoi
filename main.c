@@ -19,35 +19,8 @@
 #define NUMBER_OF_POINTS 15
 #define FILENAME "voronoi.ppm"
 #define P_FACTOR 2.0f
-
-typedef int Errno;
-
-typedef struct {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-} Pixel;
-
-typedef struct {
-    int x;
-    int y;
-    Pixel color;
-} Point;
-
-typedef struct {
-    int pointsCount;
-    Point* points;
-    int radius;
-    int width;
-    int height;
-    int autoGenerateColors;
-    float p;
-    char resultFile[100];
-    Pixel* screen;
-    Pixel* colors;
-} Diagram;
-
 #define COLORS 16
+
 enum color_name {
  	Black,
   	White,
@@ -66,6 +39,34 @@ enum color_name {
   	Teal,
   	Navy,
 };
+
+typedef int Errno;
+
+typedef struct Pixel {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+} Pixel;
+
+typedef struct Point {
+    int x;
+    int y;
+    Pixel color;
+} Point;
+
+typedef struct Diagram {
+    int pointsCount;
+    Point* points;
+    int radius;
+    int width;
+    int height;
+    int autoGenerateColors;
+    float p;
+    char resultFile[100];
+    Pixel* screen;
+    Pixel* colors;
+} Diagram;
+
 
 Pixel* defineColors()
 {
@@ -177,7 +178,6 @@ Errno saveToFile(Diagram* v)
     FILE* f = NULL;
 
     f = fopen(v->resultFile, "wb");
-
     if (f == NULL) return_defer(errno);
 
     fprintf(f, "P6\n%d %d\n255\n", v->width, v->height);
@@ -191,7 +191,7 @@ Errno saveToFile(Diagram* v)
     return result;
 }
 
-void usage(FILE* f, char* prog)
+void usage(FILE* f, const char* prog)
 {
         fprintf(f, "Usage: %s [OPTION]...\n", prog);
         fprintf(f, "Generates Voronoi diagram as PPM file.\n");
@@ -295,17 +295,16 @@ Diagram* initDiagram(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-    Errno result = 0;
+    Errno err = 0;
 
     Diagram* v = initDiagram(argc, argv);
     setRandomPoints(v);
     renderGraph(v);
     drawPoints(v);
-    Errno err = saveToFile(v);
+    err = saveToFile(v);
     if (err != 0) {
         fprintf(stderr, "Error: could not write to file %s: %s\n", v->resultFile, strerror(err));
-        result = 1;
     }
 
-    return result;;
+    return err;;
 }

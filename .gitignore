@@ -5,3 +5,4 @@
 *.png
 voronoi
 .DS_Store
+*.dSYM

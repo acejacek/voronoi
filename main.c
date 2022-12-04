@@ -177,13 +177,8 @@ Errno saveToFile(Diagram* v)
     if (ferror(f)) return_defer(errno);
 
     for (int i = 0; i < v->height * v->width; ++i) {
-        fwrite(&v->screen[i].r, sizeof(uint8_t), 1, f);
-        if (ferror(f)) return_defer(errno);
 
-        fwrite(&v->screen[i].g, sizeof(uint8_t), 1, f);
-        if (ferror(f)) return_defer(errno);
-
-        fwrite(&v->screen[i].b, sizeof(uint8_t), 1, f);
+        fwrite(&v->screen[i], sizeof(uint8_t), 3, f);   // write three RGB bytes in one shot
         if (ferror(f)) return_defer(errno);
     }
 

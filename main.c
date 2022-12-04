@@ -141,9 +141,12 @@ void drawPoints(Diagram* v)
     }
 }
 
-static inline float minkowskiDistance(float p, float dx, float dy)
+float minkowskiDistance(float p, Point n, int x, int y)
 {
-    return powf(dx, p) + powf(dy, p);
+    int dx = abs(x - n.x);
+    int dy = abs(y - n.y);
+
+    return powf((float)dx, p) + powf((float)dy, p);
 }
 
 void renderGraph(Diagram* v)
@@ -151,17 +154,10 @@ void renderGraph(Diagram* v)
     for (int y = 0; y < v->height; ++y) {
         for (int x = 0; x < v->width; ++x) {
             int closest = 0;
-            float min_distance = 3.40282e+038;
+            float min_distance = 3.402823466e+38f;
 
             for (int i = 0; i < v->pointsCount; ++i) {
-
-                float dx = abs(x - v->points[i].x);
-                if (dx > min_distance) continue;          // too far
-
-                float dy = abs(y - v->points[i].y);
-                if (dy > min_distance) continue;          // too far
-
-                float distance = minkowskiDistance(v->p, dx, dy);
+                float distance = minkowskiDistance(v->p, v->points[i], x, y);
                 if (min_distance > distance) {
                     min_distance = distance;
                     closest = i;

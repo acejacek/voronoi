@@ -8,7 +8,7 @@
 #include <getopt.h>
 #include <string.h>
 
-#define return_defer(value) do { result = (value); goto close_file; } while(0)
+#define return_defer(value) do { result = (value); goto close_file; } while (0)
 
 #define RADIUS 4
 #define RADIUS_LIMIT 100
@@ -20,24 +20,25 @@
 #define FILENAME "voronoi.ppm"
 #define P_FACTOR 2.0f
 #define COLORS 16
+#define MAX_FLOAT 3.402823466e+38f
 
 enum color_name {
- 	Black,
-  	White,
-  	Red,
-  	Lime,
-  	Blue,
-  	Yellow,
-  	Cyan,
-  	Magenta,
-  	Silver,
-  	Gray,
-  	Maroon,
-  	Olive,
-  	Green,
-  	Purple,
-  	Teal,
-  	Navy,
+    Black,
+    White,
+    Red,
+    Lime,
+    Blue,
+    Yellow,
+    Cyan,
+    Magenta,
+    Silver,
+    Gray,
+    Maroon,
+    Olive,
+    Green,
+    Purple,
+    Teal,
+    Navy,
 };
 
 typedef int Errno;
@@ -68,27 +69,27 @@ typedef struct Diagram {
 } Diagram;
 
 
-Pixel* defineColors()
+Pixel* defineColors(void)
 {
-    Pixel* colors = malloc(COLORS * sizeof(Pixel));
-    assert(colors != NULL);
+    Pixel* colors = malloc(sizeof *colors * COLORS);
+    assert(colors);
 
-    colors[0] = (Pixel){0,0,0};
-    colors[1] = (Pixel){255,255,255};
-    colors[2] = (Pixel){255,0,0};
-    colors[3] = (Pixel){0,255,0};
-    colors[4] = (Pixel){0,0,255};
-    colors[5] = (Pixel){255,255,0};
-    colors[6] = (Pixel){0,255,255};
-    colors[7] = (Pixel){255,0,255};
-    colors[8] = (Pixel){192,192,192};
-    colors[9] = (Pixel){128,128,128};
-    colors[10] = (Pixel){128,0,0};
-    colors[11] = (Pixel){128,128,0};
-    colors[12] = (Pixel){0,128,0};
-    colors[13] = (Pixel){128,0,128};
-    colors[14] = (Pixel){0,128,128};
-    colors[15] = (Pixel){0,0,128};
+    colors[0]   =  (Pixel){0,0,0};
+    colors[1]   =  (Pixel){255,255,255};
+    colors[2]   =  (Pixel){255,0,0};
+    colors[3]   =  (Pixel){0,255,0};
+    colors[4]   =  (Pixel){0,0,255};
+    colors[5]   =  (Pixel){255,255,0};
+    colors[6]   =  (Pixel){0,255,255};
+    colors[7]   =  (Pixel){255,0,255};
+    colors[8]   =  (Pixel){192,192,192};
+    colors[9]   =  (Pixel){128,128,128};
+    colors[10]  =  (Pixel){128,0,0};
+    colors[11]  =  (Pixel){128,128,0};
+    colors[12]  =  (Pixel){0,128,0};
+    colors[13]  =  (Pixel){128,0,128};
+    colors[14]  =  (Pixel){0,128,128};
+    colors[15]  =  (Pixel){0,0,128};
 
     return colors;
 }
@@ -129,7 +130,7 @@ void drawPoints(Diagram* v)
             if (y < 0 || y >= v->height) continue;
 
             for (int x = xmin; x <= xmax; ++x) {
-                if (x < 0 ||  x >= v->width) continue;
+                if (x < 0 || x >= v->width) continue;
 
                 int dx = v->points[i].x - x;
                 int dy = v->points[i].y - y;
@@ -154,7 +155,7 @@ void renderGraph(Diagram* v)
     for (int y = 0; y < v->height; ++y) {
         for (int x = 0; x < v->width; ++x) {
             int closest = 0;
-            float min_distance = 3.402823466e+38f;
+            float min_distance = MAX_FLOAT;
 
             for (int i = 0; i < v->pointsCount; ++i) {
                 float distance = minkowskiDistance(v->p, v->points[i], x, y);
@@ -174,12 +175,12 @@ Errno saveToFile(Diagram* v)
     FILE* f = NULL;
 
     f = fopen(v->resultFile, "wb");
-    if (f == NULL) return_defer(errno);
+    if (!f) return_defer(errno);
 
     fprintf(f, "P6\n%d %d\n255\n", v->width, v->height);
     if (ferror(f)) return_defer(errno);
 
-    fwrite(v->screen, sizeof(Pixel), v->width * v->height, f);   // save full screen memory
+    fwrite(v->screen, sizeof *v->screen, v->width * v->height, f);   // save full screen memory
     if (ferror(f)) return_defer(errno);
 
  close_file:
@@ -201,8 +202,9 @@ void usage(FILE* f, const char* prog)
         fprintf(f, "-r #        - point radius, default %d\n", RADIUS);
         fprintf(f, "\n");
         fprintf(f, "Example: %s -s 9 \n", prog);
-        printf("         %s -s 44 -p 1.5 -c\n", prog);
-        exit(1);
+        fprintf(f, "         %s -s 44 -p 1.5 -c\n", prog);
+
+        exit(EXIT_FAILURE);
 }
 
 void readParams(int argc, char** argv, Diagram* d)
@@ -214,7 +216,7 @@ void readParams(int argc, char** argv, Diagram* d)
                 d->pointsCount = atoi(optarg);
                 if (d->pointsCount < 1) {
                     fprintf(stderr, "Wrong number of points: %s\n", optarg);
-                    exit(1);
+                    exit(EXIT_FAILURE);
                 }
                 break;
 
@@ -222,7 +224,7 @@ void readParams(int argc, char** argv, Diagram* d)
                 d->p = atof(optarg);
                 if (d->p <= 0) {
                     fprintf(stderr, "Positive p-factor expected: %s\n", optarg);
-                    exit(1);
+                    exit(EXIT_FAILURE);
                 }
                 break;
 
@@ -238,7 +240,7 @@ void readParams(int argc, char** argv, Diagram* d)
                 d->width = atoi(optarg);
                 if (d->width > WIDTH_LIMIT || d->width < 1 ) {
                     fprintf(stderr, "Expected width in range 1 - %d\n", WIDTH_LIMIT);
-                    exit(1);
+                    exit(EXIT_FAILURE);
                 }
                 break;
 
@@ -246,7 +248,7 @@ void readParams(int argc, char** argv, Diagram* d)
                 d->height = atoi(optarg);
                 if (d->height > HEIGHT_LIMIT || d->height < 1 ) {
                     fprintf(stderr, "Expected height in range 1 - %d\n", HEIGHT_LIMIT);
-                    exit(1);
+                    exit(EXIT_FAILURE);
                 }
                 break;
 
@@ -254,7 +256,7 @@ void readParams(int argc, char** argv, Diagram* d)
                 d->radius = atoi(optarg);
                 if (d->radius > RADIUS_LIMIT || d->radius < 0 ) {
                     fprintf(stderr, "Expected radius in range 0 - %d\n", RADIUS_LIMIT);
-                    exit(1);
+                    exit(EXIT_FAILURE);
                 }
                 break;
 
@@ -267,22 +269,22 @@ void readParams(int argc, char** argv, Diagram* d)
 Diagram* initDiagram(int argc, char** argv)
 {
     static Diagram voronoi = {
-        .pointsCount = NUMBER_OF_POINTS,
-        .points = NULL,
-        .radius = RADIUS,
-        .width = WIDTH,
-        .height = HEIGHT,
-        .autoGenerateColors  = 0,
-        .p = P_FACTOR,
-        .resultFile = FILENAME,
-        .screen = NULL,
-        .colors = NULL,
+        .pointsCount         =  NUMBER_OF_POINTS,
+        .points              =  NULL,
+        .radius              =  RADIUS,
+        .width               =  WIDTH,
+        .height              =  HEIGHT,
+        .autoGenerateColors  =  0,
+        .p                   =  P_FACTOR,
+        .resultFile          =  FILENAME,
+        .screen              =  NULL,
+        .colors              =  NULL,
     };
 
     readParams(argc, argv, &voronoi);
 
-    voronoi.screen =  (Pixel*) malloc(sizeof(Pixel) * voronoi.height * voronoi.width);
-    assert(voronoi.screen != NULL);
+    voronoi.screen = malloc(sizeof *voronoi.screen * voronoi.height * voronoi.width);
+    assert(voronoi.screen);
 
     voronoi.colors = defineColors();
 
@@ -298,7 +300,7 @@ int main(int argc, char** argv)
     renderGraph(v);
     drawPoints(v);
     err = saveToFile(v);
-    if (err != 0) {
+    if (err) {
         fprintf(stderr, "Error: could not write to file %s: %s\n", v->resultFile, strerror(err));
     }
 

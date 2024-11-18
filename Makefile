@@ -1,4 +1,4 @@
-CFLAGS= -Wall -Werror -Wextra -pedantic
+CFLAGS= -Wall -Werror -pedantic
 LFLAGS=-lm
 
 ALL: main.c

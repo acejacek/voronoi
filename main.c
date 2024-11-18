@@ -159,7 +159,7 @@ void saveToFile(Diagram* v)
     size_t res;
 
     if (!f) {
-        printf("ERROR: Can't create file %s\n", v->resultFile);
+        fprintf(stderr, "ERROR: Can't create file %s\n", v->resultFile);
         exit(1);
     }
     fprintf(f, "P6\n%d %d\n255\n", v->width, v->height);
@@ -181,19 +181,19 @@ void saveToFile(Diagram* v)
 
 void usage(char* prog)
 {
-        printf("Usage: %s [OPTION]...\n", prog);
-        printf("Generates Voronoi diagram as PPM file.\n");
-        printf("\n");
-        printf("-s #        - number of points in diagram, default %d\n", NUMBER_OF_POINTS);
-        printf("-p #        - parameter in Minkowski distance calculation, default %.1f\n", P_FACTOR);
-        printf("-c          - automatically generate color palette\n");
-        printf("-f FILENAME - optional output filename, default %s\n", FILENAME);
-        printf("-w #        - diagram width, default %d\n", WIDTH);
-        printf("-h #        - diagram height, default %d\n", HEIGHT);
-        printf("-r #        - point radius, default %d\n", RADIUS);
-        printf("\n");
-        printf("Example: %s -s 9 \n", prog);
-        printf("         %s -s 44 -p 1.5 -c\n", prog);
+        fprintf(stderr, "Usage: %s [OPTION]...\n", prog);
+        fprintf(stderr, "Generates Voronoi diagram as PPM file.\n");
+        fprintf(stderr, "\n");
+        fprintf(stderr, "-s #        - number of points in diagram, default %d\n", NUMBER_OF_POINTS);
+        fprintf(stderr, "-p #        - parameter in Minkowski distance calculation, default %.1f\n", P_FACTOR);
+        fprintf(stderr, "-c          - automatically generate color palette\n");
+        fprintf(stderr, "-f FILENAME - optional output filename, default %s\n", FILENAME);
+        fprintf(stderr, "-w #        - diagram width, default %d\n", WIDTH);
+        fprintf(stderr, "-h #        - diagram height, default %d\n", HEIGHT);
+        fprintf(stderr, "-r #        - point radius, default %d\n", RADIUS);
+        fprintf(stderr, "\n");
+        fprintf(stderr, "Example: %s -s 9 \n", prog);
+        fprintf(stderr, "         %s -s 44 -p 1.5 -c\n", prog);
         exit(1);
 }
 
@@ -205,7 +205,7 @@ void readParams(int argc, char** argv, Diagram* d)
             case 's':
                 d->pointsCount = atoi(optarg);
                 if (d->pointsCount < 1) {
-                    printf("Wrong number of points: %s\n", optarg);
+                    fprintf(stderr, "Wrong number of points: %s\n", optarg);
                     exit(1);
                 }
                 break;
@@ -213,7 +213,7 @@ void readParams(int argc, char** argv, Diagram* d)
             case 'p':
                 d->p = atof(optarg);
                 if (d->p <= 0) {
-                    printf("Positive FACTOR expected: %s\n", optarg);
+                    fprintf(stderr, "Positive FACTOR expected: %s\n", optarg);
                     exit(1);
                 }
                 break;
@@ -228,21 +228,21 @@ void readParams(int argc, char** argv, Diagram* d)
             case 'w':
                 d->width = atoi(optarg);
                 if (d->width > 5000 || d->width <= 0 ) {
-                    printf("Expected width in range 0 - 5000\n");
+                    fprintf(stderr, "Expected width in range 0 - 5000\n");
                     exit(1);
                 }
                 break;
             case 'h':
                 d->height = atoi(optarg);
                 if (d->height > 4000 || d->height <= 0 ) {
-                    printf("Expected height in range 0 - 4000\n");
+                    fprintf(stderr, "Expected height in range 0 - 4000\n");
                     exit(1);
                 }
                 break;
             case 'r':
                 d->radius = atoi(optarg);
                 if (d->radius > 100 || d->height <= 0 ) {
-                    printf("Expected radius in range 0 - 100\n");
+                    fprintf(stderr, "Expected radius in range 0 - 100\n");
                     exit(1);
                 }
                 break;
